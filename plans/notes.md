@@ -3,10 +3,8 @@ Todo:
 Question: How does infer work? What does the "out" type keyword do? (Use in/out?)
 Default middleware (and register middleware with the associated key)
 
--   Dehnen
--   Clean Up Commands (unify directories, syntax)
--   Martin Antworten
--   Add Command At message partner to add plugins
+-   What to do with pluginIdent?
+-   Reduce the amount of orDies / run / runSync
 
 Idee:
 Plugin als Funktionen

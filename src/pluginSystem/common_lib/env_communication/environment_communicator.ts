@@ -38,6 +38,10 @@ export abstract class EnvironmentCommunicator {
         this.command_prefix = "BOTH";
     }
 
+    get ownAddress(): Address {
+        return this.env.ownAddress;
+    }
+
     useMiddleware(
         mw: Middleware,
         position: PartitionMiddlewareKeys<typeof this.partitionMiddleware>

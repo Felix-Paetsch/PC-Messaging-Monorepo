@@ -8,8 +8,7 @@ import applyGetPluginPrototypeModifier from "./commands/get_plugin";
 export class PluginEnvironment extends EnvironmentCommunicator {
     constructor(
         readonly env: Environment,
-        readonly kernel_address: Address,
-        readonly instance_uuid: string, // UUID of the plugin instance
+        readonly kernel_address: Address
     ) {
         super(env);
         this.command_prefix = "PLUGIN";
