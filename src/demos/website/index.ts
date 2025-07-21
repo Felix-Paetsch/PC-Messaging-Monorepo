@@ -6,7 +6,7 @@ import { log_messages, log_to_address, recieveMessageLogs } from "../../messagin
 import { callbackAsEffect } from "../../messaging/utils/run";
 import { PluginEnvironment } from "../../pluginSystem/plugin_lib/plugin_env/plugin_env";
 import { KernelImpl } from "./kernel";
-import { ui_plugin } from "./plugins/start/start";
+import { start_plugin } from "./plugins/start/start";
 import "./styles/main.css";
 
 // Create Kernel
@@ -27,16 +27,16 @@ createLocalEnvironment(kernel_address).pipe(
 )
 
 // Run Main Plugin (without boundaries)
-const ui_address = new LocalAddress("UI");
+const start_address = new LocalAddress("START");
 createLocalEnvironment(
-    ui_address
+    start_address
 ).pipe(
     Effect.andThen(env => {
         return new PluginEnvironment(env, kernel_address)
     }),
     Effect.andThen(env => {
         env.useMiddleware(log_messages(log_to_address(kernel_address)), "monitoring");
-        return callbackAsEffect(ui_plugin)(env)
+        return callbackAsEffect(start_plugin)(env)
     }),
     Effect.runPromise
 )

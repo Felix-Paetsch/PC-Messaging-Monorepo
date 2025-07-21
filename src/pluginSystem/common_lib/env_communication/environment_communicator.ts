@@ -46,7 +46,8 @@ export abstract class EnvironmentCommunicator {
         mw: Middleware,
         position: PartitionMiddlewareKeys<typeof this.partitionMiddleware>
     ) {
-        return this.partitionMiddleware[position].push(mw);
+        this.partitionMiddleware[position].push(mw);
+        return;
     }
 
     _send_command(

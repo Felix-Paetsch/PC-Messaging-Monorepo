@@ -13,7 +13,9 @@ export function createMpo<T extends MessagePartnerObject>(
     data: Json = null
 ): Effect.Effect<T, ProtocolError> {
     return Effect.gen(function* () {
+        console.log("MPO::REQ::0");
         const im = yield* yield* messagePartner._send_command(command, data);
+        console.log("MPO::REQ::1");
         const uuid = im.protocol_data as string;
 
         if (!uuid || typeof uuid !== "string") return yield* im.errorR({ message: "Expected uuid" });
@@ -22,9 +24,12 @@ export function createMpo<T extends MessagePartnerObject>(
         );
         im.onMessageError(mpo.remove());
 
+        console.log("MPO::REQ::2");
+        // This blocks, instead of giving back control.
         yield* im.awaitResponse("OK");
         const confirmationData = im.protocol_data as string;
 
+        console.log("MPO::REQ::3");
         if (confirmationData !== "OK") {
             return yield* im.errorR({
                 message: "Did not receive ok confirmation from receiver",
@@ -33,6 +38,8 @@ export function createMpo<T extends MessagePartnerObject>(
         }
 
         yield* im.finishExternal();
+
+        console.log("MPO::REQ::5");
         return mpo;
     }).pipe(
         fail_as_protocol_error
@@ -47,7 +54,9 @@ export function receiveMpo<T extends MessagePartnerObject>(
 ): Effect.Effect<void, ProtocolError> {
     return Effect.gen(function* () {
         const uuid = uuidv4();
+        console.log("MPO::XXX::0");
         yield* im.awaitResponse(uuid);
+        console.log("MPO::XXX::1");
         const okData = im.protocol_data as string;
         if (okData !== "OK") {
             return yield* im.errorR({
@@ -60,8 +69,11 @@ export function receiveMpo<T extends MessagePartnerObject>(
             Effect.mapError(e => im.asErrorR(e))
         );
 
+        console.log("MPO::XXX::2");
         cb(mpo_object);
         yield* im.close("OK", true);
+
+        console.log("MPO::XXX::3");
     }).pipe(
         fail_as_protocol_error
     )
