@@ -42,7 +42,6 @@ export default function () {
                     recieve_cb(data => {
                         return Effect.gen(function* () {
                             if ((data as any)?.type === "ck-message") {
-                                console.log("<MSG> to plugin", JSON.parse((data as any)?.value));
                                 TransmittableMessage.from_unknown((data as any)?.value).pipe(
                                     Effect.andThen(message => fullcontext.on_message.pipe(
                                         Effect.provideService(TransmittableMessageT, message)

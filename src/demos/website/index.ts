@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import { LocalAddress } from "../../messaging/base/address";
 import { createLocalEnvironment } from "../../messaging/base/environment";
 import { MessageT } from "../../messaging/base/message";
-import { log_messages, log_to_address, recieveMessageLogs } from "../../messaging/middleware/logging";
+import { recieveMessageLogs } from "../../messaging/middleware/logging";
 import { callbackAsEffect } from "../../messaging/utils/run";
 import { PluginEnvironment } from "../../pluginSystem/plugin_lib/plugin_env/plugin_env";
 import { KernelImpl } from "./kernel";
@@ -39,7 +39,7 @@ createLocalEnvironment(
         return new PluginEnvironment(env, kernel_address)
     }),
     Effect.andThen(env => {
-        env.useMiddleware(log_messages(log_to_address(kernel_address)), "monitoring");
+        // env.useMiddleware(log_messages(log_to_address(kernel_address)), "monitoring");
         return callbackAsEffect(start_plugin)(env)
     }),
     Effect.runPromise

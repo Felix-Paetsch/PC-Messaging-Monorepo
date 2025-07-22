@@ -24,7 +24,6 @@ export function createMpo<T extends MessagePartnerObject>(
 
         // This blocks, instead of giving back control.
         yield* im.awaitResponse("OK");
-        console.log("============ DIDNT BLOCK =============")
         const confirmationData = im.protocol_data as string;
 
         if (confirmationData !== "OK") {
@@ -50,7 +49,6 @@ export function receiveMpo<T extends MessagePartnerObject>(
     return Effect.gen(function* () {
         const uuid = uuidv4();
         yield* im.awaitResponse(uuid, 1000);
-        console.log("============ NOT HERE =============")
         const okData = im.protocol_data as string;
         if (okData !== "OK") {
             return yield* im.errorR({
