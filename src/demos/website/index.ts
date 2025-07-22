@@ -18,7 +18,11 @@ createLocalEnvironment(kernel_address).pipe(
                 const message = yield* MessageT;
                 const content = yield* message.content;
                 const meta_data = message.meta_data;
-                console.log(content, meta_data);
+                console.log({
+                    ...(meta_data.chain_message as any),
+                    ...(meta_data.protocol as any)
+                });
+                console.log(content);
             }).pipe(Effect.ignore)
         ))
     ),

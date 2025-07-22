@@ -1,3 +1,5 @@
+Return errors aren't handled correctly with ptotocols
+
 Todo:
 
 Question: How does infer work? What does the "out" type keyword do? (Use in/out?)

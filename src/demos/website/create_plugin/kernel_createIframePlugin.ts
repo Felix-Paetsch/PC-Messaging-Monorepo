@@ -80,6 +80,7 @@ type CreateIframeContext = {
 
 const MessageReactions: Record<string, (data: any, context: CreateIframeContext) => void> = {
     "ck-message": (data, context) => {
+        console.log("<MSG> to kernel", JSON.parse(data));
         TransmittableMessage.from_unknown(data).pipe(
             Effect.andThen(message => context.on_message.pipe(
                 Effect.provideService(TransmittableMessageT, message),

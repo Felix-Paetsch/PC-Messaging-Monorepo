@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import { Address } from "../../../messaging/base/address";
 import { CommunicationChannel, CommunicationChannelT, registerCommunicationChannel } from "../../../messaging/base/communication_channel";
 import { KernelEnv } from "../../../messaging/base/kernel_environment";
-import { MessageT, TransmittableMessage, TransmittableMessageT } from "../../../messaging/base/message";
+import { TransmittableMessage, TransmittableMessageT } from "../../../messaging/base/message";
 import { Json } from "../../../messaging/utils/json";
 import { PluginEnvironment } from "../../../pluginSystem/plugin_lib/plugin_env/plugin_env";
 import { registerPortPlugin } from "./registerPorts";
@@ -42,6 +42,7 @@ export default function () {
                     recieve_cb(data => {
                         return Effect.gen(function* () {
                             if ((data as any)?.type === "ck-message") {
+                                console.log("<MSG> to plugin", JSON.parse((data as any)?.value));
                                 TransmittableMessage.from_unknown((data as any)?.value).pipe(
                                     Effect.andThen(message => fullcontext.on_message.pipe(
                                         Effect.provideService(TransmittableMessageT, message)
@@ -53,12 +54,6 @@ export default function () {
                     });
 
                     const penv = new PluginEnvironment(KernelEnv, context.kernelAddress);
-                    penv.env.useMiddleware(
-                        Effect.gen(function* () {
-                            const message = yield* MessageT;
-                            console.log("Recieving message", message);
-                        })
-                    );
                     const prom: Promise<void> = import(/* @vite-ignore */ fullcontext.pluginPath).then(module => module.default(penv));
                     yield* Effect.tryPromise({
                         try: () => prom,
