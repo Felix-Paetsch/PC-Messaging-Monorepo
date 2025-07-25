@@ -5,18 +5,18 @@ import { Json } from "../../../messaging/utils/json";
 export function registerPortKernel(iframe: HTMLIFrameElement) {
     return Effect.async<{
         send: (data: Json) => void,
-        recieve_cb: (cb: (data: Json) => Effect.Effect<void, never, never>) => void
+        recieve: (cb: (data: Json) => void) => void
     }, TimeoutException>((resume) => {
         const { port1: mainPort, port2: iframePort } = new MessageChannel();
         mainPort.start();
 
         const send = (data: Json) => { mainPort.postMessage(data); }
-        const recieve_cb = (cb: (data: Json) => Effect.Effect<void, never, never>) => {
-            mainPort.onmessage = (event) => { cb(event.data || {}).pipe(Effect.runPromise); }
+        const recieve = (cb: (data: Json) => void) => {
+            mainPort.onmessage = (event) => cb(event.data || {});
         }
         add_port_init_event_listener(iframe, iframePort, () => resume(Effect.succeed({
             send,
-            recieve_cb
+            recieve
         })));
 
         return Effect.never;
@@ -47,7 +47,7 @@ function add_port_init_event_listener(iframe: HTMLIFrameElement, iframePort: Mes
 export function registerPortPlugin() {
     return Effect.async<{
         send: (data: Json) => void,
-        recieve_cb: (cb: (data: Json) => Effect.Effect<void, never, never>) => void
+        recieve: (cb: (data: Json) => void) => void
     }, TimeoutException>((resume) => {
         let pluginPort: MessagePort | null = null;
 
@@ -55,8 +55,8 @@ export function registerPortPlugin() {
             pluginPort!.postMessage(data);
         }
 
-        const recieve_cb = (cb: (data: Json) => Effect.Effect<void, never, never>) => {
-            pluginPort!.onmessage = (event) => { cb(event.data || {}).pipe(Effect.runPromise); }
+        const recieve = (cb: (data: Json) => void) => {
+            pluginPort!.onmessage = (event) => cb(event.data || {});
         }
 
         const initListener = (event: MessageEvent) => {
@@ -83,7 +83,7 @@ export function registerPortPlugin() {
                 window.removeEventListener('message', portListener);
                 resume(Effect.succeed({
                     send,
-                    recieve_cb
+                    recieve
                 }));
             }
         };

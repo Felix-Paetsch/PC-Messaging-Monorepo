@@ -4,6 +4,7 @@ import { Environment } from "../../../messaging/base/environment";
 import { EnvironmentCommunicator } from "../../common_lib/env_communication/environment_communicator";
 import { MPOCommunication } from "../message_partners/base/mpo_commands/mpo_communication/protocol";
 import applyGetPluginPrototypeModifier from "./commands/get_plugin";
+import applyRemovePluginPrototypeModifier from "./commands/remove_plugin";
 
 export class PluginEnvironment extends EnvironmentCommunicator {
     constructor(
@@ -21,3 +22,4 @@ export class PluginEnvironment extends EnvironmentCommunicator {
 }
 
 applyGetPluginPrototypeModifier(PluginEnvironment)
+applyRemovePluginPrototypeModifier(PluginEnvironment)

@@ -4,7 +4,6 @@ import { Address } from "../../../../messaging/base/address";
 import { Environment, EnvironmentT } from "../../../../messaging/base/environment";
 import { MessagePartnerObject, MPOInitializationError } from "../base/message_partner_object";
 import applyBridgePrototypeModifier from "./commands/bridge";
-import applySignalPrototypeModifier from "./commands/signal";
 
 export class MessagePartner extends MessagePartnerObject {
     static message_partners: MessagePartner[] = [];
@@ -114,5 +113,5 @@ export class MessagePartner extends MessagePartnerObject {
 
 export class MessagePartnerT extends Context.Tag("MessagePartnerT")<MessagePartnerT, MessagePartner>() { }
 
-applySignalPrototypeModifier(MessagePartner);
+// applySignalPrototypeModifier(MessagePartner);
 applyBridgePrototypeModifier(MessagePartner);

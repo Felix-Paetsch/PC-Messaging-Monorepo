@@ -15,6 +15,7 @@ export const start_plugin = async (env: PluginEnvironment) => {
         throw res_2.error;
     }
     const bridge = res_2.result;
+
     await bridge.send("I have no mouth");
     bridge.on((data) => {
         console.log(data + ", and I must still scream MAIN");

@@ -5,6 +5,7 @@ import { Json } from "../../../messaging/utils/json";
 import { Result } from "../../../messaging/utils/run";
 import { EnvironmentCommunicator } from "../../common_lib/env_communication/environment_communicator";
 import applyGetPluginPrototypeModifier from "./commands/get_plugin";
+import applyRemovePluginPrototypeModifier from "./commands/remove_plugin";
 
 export abstract class KernelEnvironment extends EnvironmentCommunicator {
     constructor(
@@ -12,7 +13,6 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     ) {
         super(env);
         this.command_prefix = "KERNEL";
-
     }
 
     get_plugin(plugin_ident: Json): Promise<Result<Address, Error>> {
@@ -24,4 +24,4 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
 }
 
 applyGetPluginPrototypeModifier(KernelEnvironment)
-
+applyRemovePluginPrototypeModifier(KernelEnvironment)

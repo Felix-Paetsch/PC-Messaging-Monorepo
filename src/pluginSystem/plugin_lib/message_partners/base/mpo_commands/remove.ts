@@ -6,7 +6,9 @@ import { MPOCommunicationHandler } from "./mpo_communication/MPOCommunicationHan
 
 declare module "../message_partner_object" {
     interface MessagePartnerObject {
-        remove(): Effect.Effect<void, never, never>;
+        remove(data?: Json): Promise<void>;
+        on_remove(cb: (data: Json) => void): void;
+        __remove_cb: (data: Json) => void;
     }
 }
 
@@ -16,6 +18,7 @@ export default function (MPC: typeof MessagePartnerObject) {
         on_first_request: (mp: MessagePartnerObject, ich: MPOCommunicationHandler, data: Json) => {
             return Effect.gen(mp, function* () {
                 this.removed = true;
+                this.__remove_cb(data);
                 return yield* ich.respond("OK");
             }).pipe(
                 fail_as_protocol_error
@@ -23,10 +26,17 @@ export default function (MPC: typeof MessagePartnerObject) {
         }
     });
 
-    MPC.prototype.remove = function (): Effect.Effect<void, never, never> {
+    MPC.prototype.on_remove = function (cb: (data: Json) => void) {
+        this.__remove_cb = cb;
+    }
+
+    MPC.prototype.remove = function (data: Json = null) {
         return Effect.gen(this, function* () {
             this.removed = true;
-            return yield* this._send_first_mpo_message("remove_mpo").pipe(Effect.ignore);
-        })
+            return yield* this._send_first_mpo_message("remove_mpo", data);
+        }).pipe(
+            Effect.ignore,
+            Effect.runPromise
+        )
     }
 }
