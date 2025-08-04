@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev3": "concurrently \"tsx watch src/demos/3fold/s1.ts\" \"tsx watch src/demos/3fold/s2.ts\" \"tsx watch src/demos/3fold/s3.ts\"",
     "dev:node": "tsx watch src/demos/standAlone.ts",
     "dev:browser": "vite",
+    "debug:inspect_logs": "tsx watch src/debug/logging/parse/index.ts",
     "build": "vite build",
     "preview": "vite preview"
   },

@@ -1,8 +1,7 @@
 import { Effect } from "effect";
+import { kernelDebugLogging, pluginDebugLogging } from "../debug/logging/create/middleware";
 import { LocalAddress } from "../messaging/base/address";
 import { createLocalEnvironment } from "../messaging/base/environment";
-import { MessageT } from "../messaging/base/message";
-import { log_messages, log_to_address, recieveMessageLogs } from "../messaging/middleware/logging";
 import { ErrorResult, SuccessResult } from "../messaging/utils/boundary/result";
 import { callbackAsEffect } from "../messaging/utils/boundary/run";
 import { KernelEnvironment } from "../pluginSystem/kernel_lib/kernel_env/kernel_env";
@@ -55,7 +54,7 @@ function runLocalPlugin(plugin: (env: PluginEnvironment) => Promise<void>, addre
             return new PluginEnvironment(env, kernel_address)
         }),
         Effect.andThen(env => {
-            env.useMiddleware(log_messages(log_to_address(kernel_address)), "monitoring");
+            env.useMiddleware(pluginDebugLogging(kernel_address), "monitoring");
             return callbackAsEffect(plugin)(env)
         }),
         Effect.runPromise
@@ -70,7 +69,7 @@ class KernelImpl extends KernelEnvironment {
     async create_plugin(plugin_ident: PluginIdent) {
         if (plugin_ident.name === "side") {
             await runLocalPlugin(side_plugin, side_address);
-            return new SuccessResult(new PluginReference(side_address, plugin_ident, () => { }));
+            return new SuccessResult(new PluginReference(side_address, plugin_ident, this, () => { }));
         }
 
         return new ErrorResult(new Error("Plugin not found"));
@@ -79,14 +78,7 @@ class KernelImpl extends KernelEnvironment {
 
 createLocalEnvironment(kernel_address).pipe(
     Effect.tap(env =>
-        env.useMiddleware(recieveMessageLogs(
-            Effect.gen(function* () {
-                const message = yield* MessageT;
-                const content = yield* message.content;
-                const meta_data = message.meta_data;
-                console.log(content, meta_data);
-            }).pipe(Effect.ignore)
-        ))
+        env.useMiddleware(kernelDebugLogging("logs.log"))
     ),
     Effect.andThen(env => new KernelImpl(env)),
     Effect.runSync

@@ -8,7 +8,9 @@ import { createIframePlugin } from "./create_plugin/kernel_createIframePlugin";
 
 export class KernelImpl extends KernelEnvironment {
     async create_plugin(plugin_ident: PluginIdent) {
-        if (plugin_ident.name === "DISPLAY" || plugin_ident.name === "CONTROLS") {
+        // Since this runs in the browser currently
+        const possible_plugins = ["display", "controls", "start"];
+        if (possible_plugins.includes(plugin_ident.name.toLowerCase()) && plugin_ident.name.toUpperCase() === plugin_ident.name) {
             const address = new LocalAddress(plugin_ident.name);
             const result = await createIframePlugin(
                 new LocalAddress(plugin_ident.name),
@@ -24,6 +26,7 @@ export class KernelImpl extends KernelEnvironment {
                 new PluginReference(
                     address,
                     plugin_ident,
+                    this,
                     result.value.remove
                 )
             );

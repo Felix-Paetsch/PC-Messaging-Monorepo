@@ -1,47 +1,22 @@
 import { Effect } from "effect";
+import LogInvestigator from "../../debug/logging/parse/logInverstigator";
 import { LocalAddress } from "../../messaging/base/address";
 import { createLocalEnvironment } from "../../messaging/base/environment";
-import { MessageT } from "../../messaging/base/message";
-import { log_messages, log_to_address, recieveMessageLogs } from "../../messaging/middleware/logging";
-import { callbackAsEffect } from "../../messaging/utils/boundary/run";
-import { PluginEnvironment } from "../../pluginSystem/plugin_lib/plugin_env/plugin_env";
+import { resultToEffect } from "../../messaging/utils/boundary/run";
 import { KernelImpl } from "./kernel";
-import { start_plugin } from "./plugins/start/start";
 import "./styles/main.css";
 
-// Create Kernel
-const kernel_address = new LocalAddress("KERNEL");
-createLocalEnvironment(kernel_address).pipe(
-    Effect.tap(env =>
-        env.useMiddleware(recieveMessageLogs(
-            Effect.gen(function* () {
-                const message = yield* MessageT;
-                const content = yield* message.content;
-                const meta_data = message.meta_data;
-                /*console.log(JSON.stringify({
-                    ...(meta_data.chain_message as any),
-                    ...(meta_data.protocol as any),
-                    ...content
-                }, null, 2));*/
-                // console.log(content);
-            }).pipe(Effect.ignore)
-        ))
-    ),
-    Effect.andThen(env => new KernelImpl(env)),
-    Effect.runSync
-)
+declare global {
+    var logInverstigator: LogInvestigator;
+}
 
-// Run Main Plugin (without boundaries)
-const start_address = new LocalAddress("START");
-createLocalEnvironment(
-    start_address
-).pipe(
-    Effect.andThen(env => {
-        return new PluginEnvironment(env, kernel_address)
-    }),
-    Effect.andThen(env => {
-        env.useMiddleware(log_messages(log_to_address(kernel_address)), "monitoring");
-        return callbackAsEffect(start_plugin)(env)
-    }),
-    Effect.runPromise
-)
+Effect.gen(function* () {
+    const kernel_address = new LocalAddress("KERNEL");
+    const kernel_env = yield* createLocalEnvironment(kernel_address);
+
+    globalThis.logInverstigator = new LogInvestigator();
+    yield* kernel_env.useMiddleware(globalThis.logInverstigator.middleware());
+
+    const kernel = new KernelImpl(kernel_env);
+    yield* resultToEffect(kernel.start());
+}).pipe(Effect.runPromise)

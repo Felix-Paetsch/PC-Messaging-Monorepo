@@ -2,20 +2,19 @@ import { Effect } from "effect";
 import { Address } from "../../../../messaging/base/address";
 import { EnvironmentT } from "../../../../messaging/base/environment";
 import { ProtocolError } from "../../../../messaging/protocols/base/protocol_errors";
-import { ResultPromise } from "../../../../messaging/utils/boundary/result";
-import { callbackAsEffect, runEffectAsPromise } from "../../../../messaging/utils/boundary/run";
+import { callbackAsEffect } from "../../../../messaging/utils/boundary/run";
 import { Json } from "../../../../messaging/utils/json";
 import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
 import { KernelEnvironment } from "../kernel_env";
 
 declare module "../kernel_env" {
     interface KernelEnvironment {
-        remove_plugin(address: Address, data: Json): ResultPromise<void, ProtocolError>;
+        _send_remove_plugin_message(address: Address, data: Json): Effect.Effect<void, ProtocolError>;
     }
 }
 
 export default function (KEV: typeof KernelEnvironment) {
-    KEV.prototype.remove_plugin = function (address: Address, data: Json) {
+    KEV.prototype._send_remove_plugin_message = function (address: Address, data: Json) {
         return Effect.gen(this, function* () {
             yield* yield* this._send_command(
                 address,
@@ -23,8 +22,7 @@ export default function (KEV: typeof KernelEnvironment) {
                 data
             )
         }).pipe(
-            Effect.provideService(EnvironmentT, this.env),
-            runEffectAsPromise
+            Effect.provideService(EnvironmentT, this.env)
         );
     }
 
@@ -32,7 +30,7 @@ export default function (KEV: typeof KernelEnvironment) {
         command: "remove_plugin_self",
         on_command: (communicator: KernelEnvironment, handler: EnvironmentCommunicationHandler, data: Json) => {
             return Effect.gen(communicator, function* () {
-                yield* callbackAsEffect(communicator.remove_plugin)(handler.communication_target, data);
+                yield* callbackAsEffect(communicator._send_remove_plugin_message)(handler.communication_target, data);
                 yield* handler.close(null, true);
             }).pipe(Effect.ignore);
         }

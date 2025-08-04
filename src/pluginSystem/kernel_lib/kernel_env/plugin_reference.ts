@@ -5,6 +5,7 @@ import { SequentialError } from "../../../messaging/utils/boundary/errors";
 import { ErrorResult, Result, ResultPromise, SuccessResult } from "../../../messaging/utils/boundary/result";
 import { callbackAsEffect } from "../../../messaging/utils/boundary/run";
 import { PluginIdent } from "../../plugin_lib/plugin_env/plugin_ident";
+import { KernelEnvironment } from "./kernel_env";
 
 export class PluginReference {
     public is_removed = false;
@@ -13,6 +14,7 @@ export class PluginReference {
     constructor(
         readonly address: Address,
         plugin_ident: PluginIdent,
+        readonly kernel: KernelEnvironment,
         readonly on_remove: () => void | Result<void, Error> | ResultPromise<void, Error> | Promise<void>
     ) {
         this.plugin_ident = {
@@ -28,6 +30,7 @@ export class PluginReference {
         this.is_removed = true;
 
         Effect.all([
+            this.kernel._send_remove_plugin_message(this.address, this.plugin_ident),
             callbackAsEffect(this.on_remove)()
         ])
 
