@@ -3,7 +3,10 @@ import { Message } from "../../messaging/base/message";
 
 const MessageLogSchema = Schema.Struct({
     content: Schema.Any,
-    meta_data: Schema.Any,
+    meta_data: Schema.Record({
+        key: Schema.String,
+        value: Schema.Any
+    })
 });
 
 export type MessageLog = Schema.Schema.Type<typeof MessageLogSchema>;
