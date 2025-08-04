@@ -2,8 +2,8 @@ import { Effect } from "effect";
 import { LocalAddress } from "../../messaging/base/address";
 import { createLocalEnvironment } from "../../messaging/base/environment";
 import { MessageT } from "../../messaging/base/message";
-import { recieveMessageLogs } from "../../messaging/middleware/logging";
-import { callbackAsEffect } from "../../messaging/utils/run";
+import { log_messages, log_to_address, recieveMessageLogs } from "../../messaging/middleware/logging";
+import { callbackAsEffect } from "../../messaging/utils/boundary/run";
 import { PluginEnvironment } from "../../pluginSystem/plugin_lib/plugin_env/plugin_env";
 import { KernelImpl } from "./kernel";
 import { start_plugin } from "./plugins/start/start";
@@ -18,11 +18,12 @@ createLocalEnvironment(kernel_address).pipe(
                 const message = yield* MessageT;
                 const content = yield* message.content;
                 const meta_data = message.meta_data;
-                console.log({
+                /*console.log(JSON.stringify({
                     ...(meta_data.chain_message as any),
-                    ...(meta_data.protocol as any)
-                });
-                console.log(content);
+                    ...(meta_data.protocol as any),
+                    ...content
+                }, null, 2));*/
+                // console.log(content);
             }).pipe(Effect.ignore)
         ))
     ),
@@ -39,7 +40,7 @@ createLocalEnvironment(
         return new PluginEnvironment(env, kernel_address)
     }),
     Effect.andThen(env => {
-        // env.useMiddleware(log_messages(log_to_address(kernel_address)), "monitoring");
+        env.useMiddleware(log_messages(log_to_address(kernel_address)), "monitoring");
         return callbackAsEffect(start_plugin)(env)
     }),
     Effect.runPromise

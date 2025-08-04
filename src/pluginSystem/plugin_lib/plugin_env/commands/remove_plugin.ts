@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 import { EnvironmentT } from "../../../../messaging/base/environment";
 import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
+import { callbackAsEffect } from "../../../../messaging/utils/boundary/run";
 import { Json } from "../../../../messaging/utils/json";
-import { callbackAsEffect } from "../../../../messaging/utils/run";
 import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
 import { PluginEnvironment } from "../plugin_env";
 

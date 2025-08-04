@@ -1,11 +1,11 @@
 import { Effect } from "effect";
 import { Address } from "../../../messaging/base/address";
 import { CommunicationChannel, CommunicationChannelT, registerCommunicationChannel } from "../../../messaging/base/communication_channel";
-import { TransmittableMessage, TransmittableMessageT } from "../../../messaging/base/message";
-import { Json } from "../../../messaging/utils/json";
-import { Result, callbackAsEffect, resultToEffect } from "../../../messaging/utils/run";
-
 import { KernelEnv } from "../../../messaging/base/kernel_environment";
+import { TransmittableMessage, TransmittableMessageT } from "../../../messaging/base/message";
+import { Result } from "../../../messaging/utils/boundary/result";
+import { callbackAsEffect, resultToEffect } from "../../../messaging/utils/boundary/run";
+import { Json } from "../../../messaging/utils/json";
 import { PluginEnvironment } from "../../plugin_lib/plugin_env/plugin_env";
 import type { MessageChannel } from "./kernelSide";
 

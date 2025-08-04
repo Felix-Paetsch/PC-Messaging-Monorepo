@@ -1,43 +1,35 @@
-import { Effect } from "effect";
-import { Address, LocalAddress } from "../../messaging/base/address";
-import { Json } from "../../messaging/utils/json";
-import { Result, runEffectAsPromise } from "../../messaging/utils/run";
+import { LocalAddress } from "../../messaging/base/address";
+import { ErrorResult, SuccessResult } from "../../messaging/utils/boundary/result";
+import { runEffectAsPromise } from "../../messaging/utils/boundary/run";
 import { KernelEnvironment } from "../../pluginSystem/kernel_lib/kernel_env/kernel_env";
+import { PluginReference } from "../../pluginSystem/kernel_lib/kernel_env/plugin_reference";
+import { PluginIdent } from "../../pluginSystem/plugin_lib/plugin_env/plugin_ident";
 import { createIframePlugin } from "./create_plugin/kernel_createIframePlugin";
 
-const active_plugins = new Map<Json, Address>();
 export class KernelImpl extends KernelEnvironment {
-    async get_plugin(plugin_ident: Json) {
-        if (plugin_ident === "START") {
-            return {
-                is_error: false as const,
-                result: new LocalAddress("START")
-            } as Result<Address, Error>;
-        }
-
-        if (active_plugins.has(plugin_ident)) {
-            return {
-                is_error: false as const,
-                result: active_plugins.get(plugin_ident) as Address
-            } as Result<Address, Error>;
-        }
-
-        if (plugin_ident === "DISPLAY" || plugin_ident === "CONTROLS") {
-            const address = new LocalAddress(plugin_ident);
-            return createIframePlugin(
-                new LocalAddress(plugin_ident),
+    async create_plugin(plugin_ident: PluginIdent) {
+        if (plugin_ident.name === "DISPLAY" || plugin_ident.name === "CONTROLS") {
+            const address = new LocalAddress(plugin_ident.name);
+            const result = await createIframePlugin(
+                new LocalAddress(plugin_ident.name),
                 this.env.ownAddress,
-                `/src/demos/website/plugins/${plugin_ident.toLowerCase()}/${plugin_ident.toLowerCase()}`
+                `/src/demos/website/plugins/${plugin_ident.name.toLowerCase()}/${plugin_ident.name.toLowerCase()}`
             ).pipe(
-                Effect.as(address),
                 runEffectAsPromise
+            );
+            if (result instanceof ErrorResult) {
+                throw result.error;
+            }
+            return new SuccessResult(
+                new PluginReference(
+                    address,
+                    plugin_ident,
+                    result.value.remove
+                )
             );
         }
 
-        return {
-            is_error: true as const,
-            error: new Error("Plugin not found")
-        } as Result<Address, Error>;
+        return new ErrorResult(new Error("Plugin not found"));
     }
 }
 

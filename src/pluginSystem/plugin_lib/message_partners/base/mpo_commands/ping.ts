@@ -1,7 +1,8 @@
 import { Effect, Either } from "effect";
 import { fail_as_protocol_error } from "../../../../../messaging/protocols/base/protocol_errors";
+import { ResultPromise } from "../../../../../messaging/utils/boundary/result";
+import { runEffectAsPromise } from "../../../../../messaging/utils/boundary/run";
 import { Json } from "../../../../../messaging/utils/json";
-import { ResultPromise, runEffectAsPromise } from "../../../../../messaging/utils/run";
 import { MessagePartnerObject } from "../message_partner_object";
 import { MPOCommunicationHandler } from "./mpo_communication/MPOCommunicationHandler";
 

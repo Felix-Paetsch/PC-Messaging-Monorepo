@@ -3,22 +3,24 @@ import { v4 as uuidv4 } from "uuid";
 import { Address } from "../../../../messaging/base/address";
 import { EnvironmentT } from "../../../../messaging/base/environment";
 import { ProtocolError, ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
+import { ResultPromise } from "../../../../messaging/utils/boundary/result";
+import { callbackAsEffect, CallbackError, runEffectAsPromise } from "../../../../messaging/utils/boundary/run";
 import { Json } from "../../../../messaging/utils/json";
-import { callbackAsEffect, CallbackError, ResultPromise, runEffectAsPromise } from "../../../../messaging/utils/run";
 import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
 import { MessagePartner } from "../../message_partners/message_partner/message_partner";
 import { PluginEnvironment } from "../plugin_env";
+import { PluginIdent } from "../plugin_ident";
 
 declare module "../plugin_env" {
     interface PluginEnvironment {
-        get_plugin(plugin_ident: Json, data?: Json): ResultPromise<MessagePartner, ProtocolError>
+        get_plugin(plugin_ident: PluginIdent): ResultPromise<MessagePartner, ProtocolError>
         on_plugin_request(cb: (mp: MessagePartner, data?: Json) => void): void,
         _on_plugin_request: (mp: MessagePartner, data?: Json) => Effect.Effect<void, CallbackError>
     }
 }
 
 export default function (PEC: typeof PluginEnvironment) {
-    PEC.prototype.get_plugin = function (plugin_ident: Json, data?: Json): ResultPromise<MessagePartner, ProtocolError> {
+    PEC.prototype.get_plugin = function (plugin_ident: PluginIdent): ResultPromise<MessagePartner, ProtocolError> {
         return runEffectAsPromise(
             Effect.gen(this, function* () {
                 const handlerE = yield* this._send_command(

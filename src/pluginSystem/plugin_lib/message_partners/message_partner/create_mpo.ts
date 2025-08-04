@@ -1,6 +1,7 @@
 import { Effect } from "effect";
 import { v4 as uuidv4 } from 'uuid';
 import { fail_as_protocol_error, ProtocolError } from "../../../../messaging/protocols/base/protocol_errors";
+import { callbackAsEffect } from "../../../../messaging/utils/boundary/run";
 import { Json } from "../../../../messaging/utils/json";
 import { MessagePartnerObject } from "../base/message_partner_object";
 import { MPOCommunicationHandler } from "../base/mpo_commands/mpo_communication/MPOCommunicationHandler";
@@ -61,7 +62,7 @@ export function receiveMpo<T extends MessagePartnerObject>(
             Effect.mapError(e => im.asErrorR(e))
         );
 
-        cb(mpo_object);
+        yield* callbackAsEffect(cb)(mpo_object);
         yield* im.close("OK", true);
     }).pipe(
         fail_as_protocol_error

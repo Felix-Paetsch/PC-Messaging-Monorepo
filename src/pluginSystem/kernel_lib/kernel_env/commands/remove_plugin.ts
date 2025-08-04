@@ -2,8 +2,9 @@ import { Effect } from "effect";
 import { Address } from "../../../../messaging/base/address";
 import { EnvironmentT } from "../../../../messaging/base/environment";
 import { ProtocolError } from "../../../../messaging/protocols/base/protocol_errors";
+import { ResultPromise } from "../../../../messaging/utils/boundary/result";
+import { callbackAsEffect, runEffectAsPromise } from "../../../../messaging/utils/boundary/run";
 import { Json } from "../../../../messaging/utils/json";
-import { callbackAsEffect, ResultPromise, runEffectAsPromise } from "../../../../messaging/utils/run";
 import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
 import { KernelEnvironment } from "../kernel_env";
 
